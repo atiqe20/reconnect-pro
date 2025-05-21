@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide-react@0.292.0/dist/umd/lucide-react.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .sidebar-item {
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+        }
+        .sidebar-item.active svg, .sidebar-item:hover svg {
+             color: white;
+        }
+        .content-section {
+            display: none; /* Hidden by default */
+        }
+        .content-section.active {
+            display: block; /* Shown when active */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+            padding: 1.5rem; /* p-6 */
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 500; /* medium */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* indigo-700 */
+        }
+        .btn-secondary {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #374151; /* gray-700 */
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db; /* gray-300 */
+        }
+        /* Simple Rich Text Editor Placeholder */
+        .rich-text-editor {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            min-height: 200px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        th {
+            background-color: #f9fafb; /* gray-50 */
+            font-weight: 600; /* semibold */
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75em;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.375rem; /* rounded-md */
+        }
+        .badge-green {
+            color: #065f46; /* green-800 */
+            background-color: #d1fae5; /* green-100 */
+        }
+        .badge-blue {
+            color: #1e40af; /* blue-800 */
+            background-color: #dbeafe; /* blue-100 */
+        }
+        .badge-yellow {
+            color: #92400e; /* yellow-800 */
+            background-color: #fef3c7; /* yellow-100 */
+        }
+        .badge-red {
+            color: #991b1b; /* red-800 */
+            background-color: #fee2e2; /* red-100 */
+        }
+        .icon {
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            margin-right: 0.5rem; /* mr-2 */
+            color: #6b7280; /* gray-500 */
+        }
+        /* Tab styling */
+        .tab-button {
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            font-weight: 500; /* medium */
+            color: #6b7280; /* gray-500 */
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .tab-button:hover {
+            color: #4f46e5; /* indigo-600 */
+        }
+        .tab-button.active {
+            color: #4f46e5; /* indigo-600 */
+            border-bottom-color: #4f46e5; /* indigo-600 */
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-input, .form-select, .form-textarea {
+            margin-top: 0.25rem; /* mt-1 */
+            display: block;
+            width: 100%;
+            border-radius: 0.375rem; /* rounded-md */
+            border-color: #d1d5db; /* border-gray-300 */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #4f46e5; /* focus:border-indigo-500 */
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); /* focus:ring-indigo-500 */
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            color: #374151; /* text-gray-700 */
+        }
+        .form-checkbox {
+            border-radius: 0.25rem; /* rounded */
+            border-color: #d1d5db; /* border-gray-300 */
+            color: #4f46e5; /* text-indigo-600 */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+        }
+        .form-checkbox:focus {
+            border-color: #4338ca; /* focus:border-indigo-300 */
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.5); /* focus:ring focus:ring-indigo-200 focus:ring-opacity-50 */
+        }
+
+    </style>
+</head>
+
+<body class="flex h-screen">
+
+    <aside class="w-64 bg-gray-800 text-gray-100 flex flex-col p-4 space-y-2 overflow-y-auto">
+        <div class="text-2xl font-semibold p-4 text-white flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send mr-2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            MarketingPro
+        </div>
+        <nav class="flex-grow">
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="dashboard">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Dashboard
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="customer-management">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Customer Management
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="messaging-channels">
+                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Messaging Channels
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="templates-library">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+                Templates Library
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="automation-sequences">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.9 10.3A5.4 5.4 0 0 1 22 15.9V20a1 1 0 0 1-1 1h-3M2 15.9A5.4 5.4 0 0 1 6.1 10.3 5.4 5.4 0 0 1 12 6.1a5.4 5.4 0 0 1 5.9 4.2M12 12v9"></path><path d="M12 6.1V2"></path><path d="m7 11 3-3 3 3"></path></svg>
+                Automation & Sequences
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="campaign-manager">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="m16 16-4-4-4 4"></path></svg>
+                Campaign Manager
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="analytics-reports">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+                Analytics & Reports
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="settings">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Settings
+            </a>
+            <a href="#" class="sidebar-item flex items-center py-2.5 px-4 rounded-md" data-target="bonuses">
+                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gift"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect width="20" height="5" x="2" y="7"></rect><line x1="12" x2="12" y1="22" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                Bonuses
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6 sm:p-8 md:p-10 overflow-y-auto">
+        <section id="dashboard" class="content-section active">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="card">
+                    <h3 class="text-lg font-medium text-gray-700 mb-1">আজকের পাঠানো SMS</h3>
+                    <p class="text-3xl font-bold text-indigo-600">1,250</p>
+                    <p class="text-sm text-green-500">+5% from yesterday</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-medium text-gray-700 mb-1">আজকের পাঠানো WhatsApp</h3>
+                    <p class="text-3xl font-bold text-green-600">870</p>
+                    <p class="text-sm text-green-500">+8% from yesterday</p>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-medium text-gray-700 mb-1">আজকের পাঠানো Email</h3>
+                    <p class="text-3xl font-bold text-blue-600">3,400</p>
+                    <p class="text-sm text-red-500">-2% from yesterday</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Active Campaigns</h2>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between items-center"><span>Eid Special Offer</span> <span class="badge badge-green">SMS, WhatsApp</span></li>
+                        <li class="flex justify-between items-center"><span>New Product Launch</span> <span class="badge badge-blue">Email</span></li>
+                        <li class="flex justify-between items-center"><span>Weekend Flash Sale</span> <span class="badge badge-yellow">SMS</span></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Responses</h2>
+                    <p class="text-gray-600">Customer A: "Interested in the offer." (WhatsApp)</p>
+                    <p class="text-gray-600">Customer B: Clicked on Email link. (Email)</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Segment-wise Stats</h2>
+                    <p class="text-gray-600">High Spenders: 75% Open Rate (Email)</p>
+                    <p class="text-gray-600">New Customers: 15% Conversion (SMS)</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Schedule Summary (Upcoming messages)</h2>
+                    <p class="text-gray-600">Tomorrow 10 AM: Follow-up SMS to Segment X (500 contacts)</p>
+                    <p class="text-gray-600">Next Monday 2 PM: Newsletter Email (2000 contacts)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="customer-management" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Customer Management</h1>
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">2.1 Import Data</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Manual Entry</h3>
+                            <button class="btn btn-secondary w-full">Add Customer</button>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Excel/CSV Upload</h3>
+                            <input type="file" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">API Integration</h3>
+                            <p class="text-sm text-gray-600">Connect WooCommerce, Shopify, etc.</p>
+                            <button class="btn btn-secondary mt-1 w-full">Configure APIs</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">2.2 Customer Segmentation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Filters</h3>
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-600">Gender, Purchase History, Location, Interest.</p>
+                                <button class="btn btn-secondary text-sm">Apply Filters</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-700 mb-2">Tagging System</h3>
+                            <p class="text-sm text-gray-600">New Customer, Repeat Buyer, High Spender, Silent User.</p>
+                            <button class="btn btn-secondary text-sm mt-1">Manage Tags</button>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Create Dynamic Segments</h3>
+                        <p class="text-sm text-gray-600">e.g., last 30 days inactive customers.</p>
+                        <button class="btn btn-primary mt-1">Create Segment</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="messaging-channels" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Messaging Channels</h1>
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">3.1 SMS</h2>
+                    <p class="text-sm text-gray-600 mb-2">API Integration: Ajura, mRobi, SSLWireless</p>
+                    <p class="text-sm text-gray-600 mb-2">Template Manager (variable tags supported: {name}, {last_order}, etc.)</p>
+                    <div class="flex space-x-2 mt-4">
+                        <button class="btn btn-primary">Schedule SMS</button>
+                        <button class="btn btn-secondary">Send SMS Now</button>
+                        <button class="btn btn-secondary">Manage Templates</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">3.2 WhatsApp</h2>
+                    <p class="text-sm text-gray-600 mb-2">Integration: WhatsApp Business API</p>
+                    <p class="text-sm text-gray-600 mb-2">Send Button, Template Usage, Image+Text+Link support</p>
+                    <p class="text-sm text-gray-600 mb-2">Auto-response setup</p>
+                     <div class="flex space-x-2 mt-4">
+                        <button class="btn btn-primary">Send WhatsApp</button>
+                        <button class="btn btn-secondary">Manage Templates</button>
+                        <button class="btn btn-secondary">Setup Auto-response</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">3.3 Email</h2>
+                    <p class="text-sm text-gray-600 mb-2">API: Mailgun, SendGrid</p>
+                    <p class="text-sm text-gray-600 mb-2">Template system (with brand color, logo, CTA buttons)</p>
+                    <h3 class="text-lg font-medium text-gray-700 my-3">Rich HTML Editor (Placeholder)</h3>
+                    <div class="rich-text-editor bg-white contenteditable">
+                        Compose your email here...
+                    </div>
+                     <div class="flex space-x-2 mt-4">
+                        <button class="btn btn-primary">Send Email</button>
+                        <button class="btn btn-secondary">Manage Templates</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="templates-library" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Templates Library</h1>
+            <div class="card">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Categories</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-1 mb-4">
+                    <li>Welcome Message</li>
+                    <li>Thank You After Purchase</li>
+                    <li>Small Offer Alert</li>
+                    <li>Big Campaign Offer</li>
+                    <li>Eid, Puja, New Year Offer</li>
+                    <li>Birthday/Anniversary Messages</li>
+                </ul>
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Features</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-1">
+                    <li>Edit/Clone/Customize templates</li>
+                    <li>Use templates across all 3 channels (SMS, WhatsApp, Email)</li>
+                    <li>Support for Emoji, CTA buttons, Image placeholders</li>
+                </ul>
+                <div class="mt-6">
+                    <button class="btn btn-primary">Create New Template</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="automation-sequences" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Automation & Sequences</h1>
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Create Workflow</h2>
+                    <p class="text-gray-600 mb-2">Example: After Purchase → Wait 3 Days → Send Thank You SMS → Wait 2 Days → Send WhatsApp Offer</p>
+                    <h3 class="text-lg font-medium text-gray-700 my-3">Drag & Drop Style Automation Flow Builder (Placeholder)</h3>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500 h-64 flex items-center justify-center">
+                        Visual Flow Builder Area
+                    </div>
+                    <button class="btn btn-primary mt-4">Create New Workflow</button>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Trigger-based Automation</h2>
+                    <ul class="list-disc list-inside text-gray-600 space-y-1">
+                        <li>First Purchase</li>
+                        <li>Last Purchase Date</li>
+                        <li>Birthday</li>
+                    </ul>
+                    <button class="btn btn-secondary mt-4">Configure Triggers</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="campaign-manager" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Campaign Manager</h1>
+             <div class="space-y-8">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Create New Campaign</h2>
+                    <form class="space-y-4">
+                        <div>
+                            <label for="campaignName" class="form-label">Campaign Name</label>
+                            <input type="text" id="campaignName" class="form-input p-2" placeholder="e.g., Eid Mega Sale">
+                        </div>
+                        <div>
+                            <label for="segmentSelect" class="form-label">Choose Segment</label>
+                            <select id="segmentSelect" class="form-select p-2">
+                                <option>All Customers</option>
+                                <option>High Spenders</option>
+                                <option>Last 30 Days Inactive</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Select Channel(s)</label>
+                            <div class="mt-1 space-x-4">
+                                <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox"> <span class="ml-2">SMS</span></label>
+                                <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox"> <span class="ml-2">WhatsApp</span></label>
+                                <label class="inline-flex items-center"><input type="checkbox" class="form-checkbox"> <span class="ml-2">Email</span></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="templateSelect" class="form-label">Pick Template</label>
+                            <select id="templateSelect" class="form-select p-2">
+                                <option>Welcome Message Template</option>
+                                <option>Eid Offer Template</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="scheduleDate" class="form-label">Set Schedule or Send Now</label>
+                            <input type="datetime-local" id="scheduleDate" class="form-input p-2">
+                            <button type="button" class="btn btn-secondary mt-2">Send Now</button>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Launch Campaign</button>
+                    </form>
+                </div>
+                 <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Campaign Analytics</h2>
+                    <p class="text-gray-600">Open Rate, Click Rate (for Email/WhatsApp)</p>
+                    <p class="text-gray-600">Delivery Rate</p>
+                    <p class="text-gray-600">Conversion Estimate</p>
+                    <div class="mt-4 table-container">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th>Campaign</th>
+                                    <th>Channel</th>
+                                    <th>Sent</th>
+                                    <th>Delivered</th>
+                                    <th>Opened/Clicked</th>
+                                    <th>Conversion</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td>Eid Special</td>
+                                    <td>SMS</td>
+                                    <td>1250</td>
+                                    <td>1200 (96%)</td>
+                                    <td>N/A</td>
+                                    <td>120 (10%)</td>
+                                </tr>
+                                <tr>
+                                    <td>Newsletter May</td>
+                                    <td>Email</td>
+                                    <td>3400</td>
+                                    <td>3350 (98.5%)</td>
+                                    <td>800 (23.8%)</td>
+                                    <td>80 (2.3%)</td>
+                                 </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="analytics-reports" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Analytics & Reports</h1>
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Segment Performance</h2>
+                    <p class="text-gray-600">Placeholder for segment performance charts and data.</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Channel-wise Report</h2>
+                    <p class="text-gray-600">Placeholder for channel-wise (SMS, WhatsApp, Email) reports.</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Automation Report</h2>
+                    <p class="text-gray-600">Placeholder for automation workflow performance.</p>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Export Reports</h2>
+                    <div class="flex space-x-2">
+                        <button class="btn btn-secondary">Export as PDF</button>
+                        <button class="btn btn-secondary">Export as Excel</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="settings" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Settings</h1>
+            <div class="space-y-8">
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">API Settings</h2>
+                    <p class="text-gray-600">Configure API keys for SMS, Email, WhatsApp.</p>
+                    <button class="btn btn-secondary mt-2">Manage API Keys</button>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Branding</h2>
+                    <p class="text-gray-600">Upload Logo, Set Brand Color, Footer Info.</p>
+                     <button class="btn btn-secondary mt-2">Customize Branding</button>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Notification Settings</h2>
+                    <p class="text-gray-600">Manage email and app notifications.</p>
+                    <button class="btn btn-secondary mt-2">Configure Notifications</button>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">User Access Control</h2>
+                    <p class="text-gray-600">Manage team members and their permissions.</p>
+                    <button class="btn btn-secondary mt-2">Manage Users</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="bonuses" class="content-section">
+            <h1 class="text-3xl font-semibold text-gray-800 mb-6">Bonuses</h1>
+
+            <div class="mb-6 border-b border-gray-200">
+                <nav class="flex -mb-px" aria-label="Tabs">
+                    <button class="tab-button active" data-tab-target="create-bonus-content">Create Bonus</button>
+                    <button class="tab-button" data-tab-target="bonus-history-content">Bonus History</button>
+                </nav>
+            </div>
+
+            <div>
+                <div id="create-bonus-content" class="tab-content active space-y-8">
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 1: Choose a Bonus Type</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <label class="p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 cursor-pointer">
+                                <input type="radio" name="bonus_type" value="first_time" class="form-radio mr-2">
+                                🎉 First-Time Buyer Bonus
+                            </label>
+                            <label class="p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 cursor-pointer">
+                                <input type="radio" name="bonus_type" value="repeat_customer" class="form-radio mr-2">
+                                🔁 Repeat Customer Reward
+                            </label>
+                            <label class="p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 cursor-pointer">
+                                <input type="radio" name="bonus_type" value="big_purchase" class="form-radio mr-2">
+                                🛍️ Big Purchase Reward (e.g., orders over ৳2000)
+                            </label>
+                            <label class="p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 cursor-pointer">
+                                <input type="radio" name="bonus_type" value="come_back" class="form-radio mr-2">
+                                💤 Come Back Bonus (for inactive customers)
+                            </label>
+                            <label class="p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 cursor-pointer">
+                                <input type="radio" name="bonus_type" value="birthday_anniversary" class="form-radio mr-2">
+                                🎂 Birthday/Anniversary Gift
+                            </label>
+                            <label class="p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 cursor-pointer">
+                                <input type="radio" name="bonus_type" value="referral" class="form-radio mr-2">
+                                📦 Referral Bonus
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 2: Set Bonus Rules</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="triggerCondition" class="form-label">Trigger Condition</label>
+                                <input type="text" id="triggerCondition" class="form-input p-2" placeholder="e.g., order placed, last seen 30 days ago">
+                            </div>
+                            <div>
+                                <label for="customerSegment" class="form-label">Customer Segment</label>
+                                <select id="customerSegment" class="form-select p-2">
+                                    <option>All Customers</option>
+                                    <option>VIP Customers</option>
+                                    <option>New Customers</option>
+                                    <option>Inactive Customers</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="bonusValue" class="form-label">Bonus Value</label>
+                                <input type="text" id="bonusValue" class="form-input p-2" placeholder="e.g., ৳100, 10% off, FREE_SHIP">
+                            </div>
+                            <div>
+                                <label for="validDuration" class="form-label">Valid Duration</label>
+                                <input type="text" id="validDuration" class="form-input p-2" placeholder="e.g., 3 days, 24 hours">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 3: Choose Delivery Channel</h2>
+                        <div class="space-y-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox"> <span class="ml-2">✅ SMS</span>
+                            </label><br>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox"> <span class="ml-2">✅ WhatsApp</span>
+                            </label><br>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox"> <span class="ml-2">✅ Email</span>
+                            </label>
+                            <p class="text-sm text-gray-500">(You can select multiple channels to maximize reach.)</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 4: Select or Customize Message Template</h2>
+                        <div>
+                            <label for="bonusTemplateSelect" class="form-label">Choose a prebuilt bonus message template, or write your own:</label>
+                            <select id="bonusTemplateSelect" class="form-select p-2 mb-2">
+                                <option value="">-- Select a template --</option>
+                                <option value="template1">First Time Buyer Offer</option>
+                                <option value="template2">Birthday Special Discount</option>
+                            </select>
+                            <textarea id="customBonusMessage" class="form-textarea p-2" rows="4" placeholder="Write your own message with placeholders like {name}, {bonus_amount}, {valid_until}, {coupon_code}"></textarea>
+                        </div>
+                        <div class="mt-4 p-3 bg-gray-100 rounded-md">
+                            <h4 class="font-medium text-gray-700">✅ Example Template:</h4>
+                            <p class="text-sm text-gray-600">Hi {name}! 🎁 You just unlocked a special ৳100 bonus on your next order! Use code BONUS100 before {valid_until}. Shop now 👉 [link]</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Step 5: Activate the Bonus</h2>
+                        <p class="text-gray-600 mb-4">Preview everything before activating. The system will automatically monitor the conditions and send messages when they are met.</p>
+                        <div class="flex space-x-3">
+                            <button class="btn btn-secondary">Preview Bonus</button>
+                            <button class="btn btn-primary">Activate Bonus</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bonus-history-content" class="tab-content space-y-8">
+                    <div class="card">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 Bonus History & Tracking</h2>
+                        <div class="table-container">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th>Bonus Name/Type</th>
+                                        <th>Triggered</th>
+                                        <th>Recipients</th>
+                                        <th>Click/Open Rates</th>
+                                        <th>Redeemed</th>
+                                        <th>Date Activated</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td>First-Time Buyer 10% Off</td>
+                                        <td>150 times</td>
+                                        <td>148</td>
+                                        <td>Email: 30% Open, WA: 45% Read</td>
+                                        <td>25 (via Shopify)</td>
+                                        <td>2024-05-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Birthday ৳200 Gift</td>
+                                        <td>35 times</td>
+                                        <td>35</td>
+                                        <td>SMS: N/A</td>
+                                        <td>10 (Manually Tracked)</td>
+                                        <td>2024-04-15</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="6" class="text-center text-gray-500 py-4">No more bonus history to display.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">💡 Best Practices</h2>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Combine Bonuses with Automation Sequences for greater effect.</li>
+                    <li>Personalize the bonus messages to feel more human.</li>
+                    <li>Use urgency (e.g., “valid for 24 hours only”) to increase conversions.</li>
+                    <li>Send different bonuses for SMS vs WhatsApp (e.g., richer visuals for WhatsApp).</li>
+                    <li>Regularly review your Bonus History to optimize performance.</li>
+                    <li>Ensure your bonus redemption tracking is accurate (integrate with store if possible).</li>
+                </ul>
+            </div>
+        </section>
+
+
+    </main>
+
+    <script>
+        // JavaScript for handling sidebar navigation
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            const mainContent = document.querySelector('main');
+
+            // Function to switch active section in main content
+            function switchSection(targetId) {
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                sidebarItems.forEach(item => {
+                    if (item.dataset.target === targetId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                if(mainContent) {
+                    mainContent.scrollTop = 0; // Scroll to top of content area
+                }
+            }
+
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const targetId = this.dataset.target;
+                    switchSection(targetId);
+                });
+            });
+
+            const initialTarget = 'dashboard';
+            if (document.getElementById(initialTarget)) {
+                 switchSection(initialTarget);
+            } else if (sidebarItems.length > 0) {
+                switchSection(sidebarItems[0].dataset.target);
+            }
+
+            // JavaScript for handling tab switching within a content section (e.g., Bonuses)
+            const tabContainers = document.querySelectorAll('#bonuses'); // Apply to all sections that might have tabs
+
+            tabContainers.forEach(container => {
+                const tabButtons = container.querySelectorAll('.tab-button');
+                const tabContents = container.querySelectorAll('.tab-content');
+
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const targetTabContentId = this.dataset.tabTarget;
+
+                        // Deactivate all tabs within this container
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        tabContents.forEach(content => content.classList.remove('active'));
+
+                        // Activate clicked tab and its content
+                        this.classList.add('active');
+                        container.querySelector(`#${targetTabContentId}`).classList.add('active');
+                    });
+                });
+            });
+
+            // Lucide icons initialization (if needed, though UMD usually handles it)
+            // lucide.createIcons();
+        });
+    </script>
+
+</body>
+</html>
